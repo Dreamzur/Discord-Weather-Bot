@@ -2,12 +2,19 @@ import nextcord
 from nextcord.ext import commands
 import requests #This is the library 
 import random #This library will be used to select a random answer to the user
+import os
+from dotenv import load_dotenv
+
+
+# Load environment variables
+load_dotenv(".env")
 
 #----APIs to use----#
 # WeatherAPI key
-API_KEY = "7dadcc4435ad436c8b104250241805"
+API_KEY = os.getenv('KEY')
 # API_BOT_Discord
-API_BOT = "MTI0MDg1OTEwMjA4MzgxMzQwNw.GUyVcC.rnbYLs3JaM_FMY8MlIY2N7cRKm6rPRMvLFegmw"
+API_BOT = os.getenv('TOKEN')
+#-------------------#
 
 
 # 1st Step: Initialize the bot
@@ -65,6 +72,12 @@ async def get_weather(ctx, *, city: str): #For now is done to write the city, it
         print(e)
 
 # 4 Step: Let's run the bot :)
-bot.run(API_BOT)
+try:
+    if API_BOT is None:
+        raise ValueError("Issue with Discord Token:\nEither check credentials or reset token on the developer portal.")
+    bot.run(API_BOT)
+except ValueError as e:
+    print(e)
+
 
 #this is a test
