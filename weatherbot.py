@@ -3,7 +3,7 @@ from nextcord.ext import commands
 import requests #This is the library 
 import random #This library will be used to select a random answer to the user
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv #This library is used for the dotenv file
 
 
 # Load environment variables
@@ -73,11 +73,9 @@ async def get_weather(ctx, *, city: str): #For now is done to write the city, it
 
 # 4 Step: Let's run the bot :)
 try:
+    # Checks if Bot Token is working or valid
     if API_BOT is None:
         raise ValueError("Issue with Discord Token:\nEither check credentials or reset token on the developer portal.")
     bot.run(API_BOT)
 except ValueError as e:
     print(e)
-
-
-#this is a test
