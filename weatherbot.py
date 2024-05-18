@@ -7,7 +7,7 @@ import random #This library will be used to select a random answer to the user
 # WeatherAPI key
 API_KEY = "7dadcc4435ad436c8b104250241805"
 # API_BOT_Discord
-API_BOT = "MTI0MDg1OTEwMjA4MzgxMzQwNw.GUyVcC.rnbYLs3JaM_FMY8MlIY2N7cRKm6rPRMvLFegmw"
+API_BOT = "DISCORD_TOKEN_HERE"
 
 
 # 1st Step: Initialize the bot
