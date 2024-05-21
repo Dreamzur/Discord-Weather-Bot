@@ -216,6 +216,19 @@ async def show_commands(ctx):
     commands_text += "\n".join([f"• {cmd}" for cmd in commands_list])
     await ctx.send(commands_text)
 
+#About Me COMMAND: This command shows information on the bot itself
+@bot.command(name='about')
+async def about_command(ctx):
+    embed = nextcord.Embed(
+        title= "About Me",
+        description= "Hello! I'm your servers Weather Bot. Currently I'm under development so don't have many useful features as of yet."
+    )
+    embed.add_field(name="Author", value="Capstone I Group I", inline=True)
+    embed.add_field(name="Version", value="0", inline=True)
+    embed.add_field(name="Library", value="nextcord", inline=True)
+    embed.add_field(name="Commands", value="Use `!commands` to see the list of available commands.", inline=True)
+
+    await ctx.send(embed = embed)
 
 # 6th Step: Let's run the bot--------------------------------------------------------------------------------------------
 try:
