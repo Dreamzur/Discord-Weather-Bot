@@ -4,7 +4,8 @@ import requests #This is the library
 import random #This library will be used to select a random answer to the user
 import os
 from dotenv import load_dotenv #This library is used for the dotenv file
-
+from PIL import Image
+import io
 
 # Load environment variables
 load_dotenv(".env")
@@ -14,6 +15,8 @@ load_dotenv(".env")
 API_KEY = os.getenv('KEY')
 # API_BOT_Discord
 API_BOT = os.getenv('TOKEN')
+# DEEP_AI_API to generate AI Images
+DEEP_AI_API_KEY = os.getenv('DEEP_AI_API_KEY')
 #-------------------#
 
 
@@ -71,6 +74,26 @@ async def get_location(ctx):
         await ctx.send("No response or timeout. Please try again.")
         print(e)
 
+#Method to generate AI Image with the weather prompt
+async def generate_weather_image(condition: str):
+    url = "https://api.deepai.org/api/text2img"
+    headers = {
+        'api-key': DEEP_AI_API_KEY
+    }
+    data = {
+        #This is the prompt used to generate the image. Can be edited as neeeded.
+        'text': f"Genius mode: Create a 3D animated weather cat character with a background depicting {condition} setting. Ensure the character's appearance accurately reflects the current weather condition and remains well-defined at all times. Emphasize showcasing both the weather and the adapted character in the image."
+    }
+    response = requests.post(url, headers=headers, data=data)
+    result = response.json()
+
+    if 'output_url' in result:
+        image_response = requests.get(result['output_url'])
+        image = Image.open(io.BytesIO(image_response.content))
+        return image
+    else:
+        raise Exception("Error generating image with DeepAI API")
+
 
 # 4th Step: Command to get weather information------------------------------------------------------------------
 @bot.command(name='weather')
@@ -96,12 +119,20 @@ async def get_weather(ctx, *, city: str): #Get info of the weather of the given 
             f" but really Feels Like ***{current['feelslike_f']}°F***.\n"
             f"In the other hand, Humidity is in ***{current['humidity']}%***"
             f" and the Wind Speed is ***{current['wind_mph']} mph***.\n\n"
-            f"**Ask me for any City!**"
+            f"**Ask me for any City!**\n\n"
+            f"**Weather Cat Ilustration:**"
         )
 
         #This will choose a random greeting from the stack
         greeting = random.choice(greeting_English).format(user=ctx.author.name)
         await ctx.send(f"{greeting}\n{weather_report}")
+
+        weather_image = await generate_weather_image(current['condition']['text'])
+        with io.BytesIO() as image_binary:
+            weather_image.save(image_binary, 'PNG')
+            image_binary.seek(0)
+            await ctx.send(file=nextcord.File(fp=image_binary, filename='weather.png'))
+
     except Exception as e:
         await ctx.send("An error occurred while fetching the weather data. Please contact @stewpidest")
         print(e)
@@ -210,6 +241,7 @@ async def show_commands(ctx):
         "`!weather_all` - Get the weather for all active members of the server (If it is saved).",
         "`!weather_spanish <city>` - Get the weather in Spanish for a specified city.",
         "`!get_location` - Save your current location.",
+        "`!about` - Show Bot information.",
         # Add more commands here as needed
     ]
     commands_text = "**Here are the commands you can use:**\n\n"
