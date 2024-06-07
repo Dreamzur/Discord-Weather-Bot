@@ -1,10 +1,11 @@
 import nextcord
-from nextcord.ext import commands
+from nextcord.ext import commands, tasks
 import requests #This is the library 
 import random #This library will be used to select a random answer to the user
 import os
 from dotenv import load_dotenv #This library is used for the dotenv file
 from PIL import Image
+from datetime import timedelta
 import io
 
 # Load environment variables
@@ -27,13 +28,21 @@ intents.message_content = True
 intents.members = True
 bot = commands.Bot(command_prefix="!", intents = intents)
 
-# Dictionary to store user cities
+# Dictionary to store user cities and preferences
 user_cities = {}
+user_weather_tips = {}
+user_weather_alerts = {}
+weather_update_tasks = {}
 
 # 2nd Step: What to do when the bot is ready to go-------------------------------------------------------------
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user}') # Can be edited 
+    for guild in bot.guilds:
+        for channel in guild.text_channels:
+            if channel.name == 'bot-testing':  # Channel name
+                await channel.send(f'Hello! I am Weather Cat Bot and I am now ready to assist you with weather updates! (!commands)')
+                break
 
 # List of greeting phrases (Can be added as many as needed)
 greeting_English = [
@@ -50,6 +59,15 @@ greeting_Spanish = [
     "**Aquí está la información que solicitaste, {user}!**",
     "**Por supuesto, {user}!**"
 ]
+# Default weather tips
+weather_tips = {
+    'Rain': "Don't forget your umbrella!",
+    'Snow': "Wear warm clothes and stay safe!",
+    'Heat': "Stay hydrated and avoid the sun during peak hours!",
+    'Clear': "Enjoy the beautiful weather!",
+    'Thunderstorm': "Stay indoors and avoid using electrical appliances!",
+    'Partly cloudy': "Don't forget your umbrella! It may rain."
+}
 
 # 3rd Step: Get user's location from saved list or add it if needed----------------------------------------------
 @bot.command(name='get_location')
@@ -80,19 +98,27 @@ async def generate_weather_image(condition: str):
     headers = {
         'api-key': DEEP_AI_API_KEY
     }
+    # Adjusted prompt for creating a weather cat character
     data = {
-        #This is the prompt used to generate the image. Can be edited as neeeded.
-        'text': f"Genius mode: Create a 3D animated weather cat character with a background depicting {condition} setting. Ensure the character's appearance accurately reflects the current weather condition and remains well-defined at all times. Emphasize showcasing both the weather and the adapted character in the image."
+        'text': f"Genius Mode: Create in weather climate a 3D animated cat character that dress and animate according to the weather conditions, such as {condition}."
     }
+
+    print(f"Prompt sent to DeepAI: {data['text']}")  # Log the prompt for debugging
+
     response = requests.post(url, headers=headers, data=data)
     result = response.json()
+    
+    # Print the result for debugging
+    print(f"DeepAI response: {result}")
 
     if 'output_url' in result:
         image_response = requests.get(result['output_url'])
         image = Image.open(io.BytesIO(image_response.content))
         return image
     else:
-        raise Exception("Error generating image with DeepAI API")
+        raise Exception(f"Error generating image with DeepAI API: {result.get('error', 'Unknown error')}")
+
+
 
 
 # 4th Step: Command to get weather information------------------------------------------------------------------
@@ -127,11 +153,19 @@ async def get_weather(ctx, *, city: str): #Get info of the weather of the given 
         greeting = random.choice(greeting_English).format(user=ctx.author.name)
         await ctx.send(f"{greeting}\n{weather_report}")
 
-        weather_image = await generate_weather_image(current['condition']['text'])
+        weather_image = await generate_weather_image(current['condition']['text'] + ", in " + location['name'] + ", " + location['country'])
         with io.BytesIO() as image_binary:
             weather_image.save(image_binary, 'PNG')
             image_binary.seek(0)
             await ctx.send(file=nextcord.File(fp=image_binary, filename='weather.png'))
+
+        # Send weather tips if enabled
+        if user_weather_tips.get(ctx.author.id, False):
+            condition = current['condition']['text']
+            tip = weather_tips.get(condition, "No tips available for this weather condition.")
+            await ctx.send(f"**Weather Tip:** {tip}")
+        else:
+            await ctx.send(f"**(Activate Weather Tips with !weatherTips on)**")
 
     except Exception as e:
         await ctx.send("An error occurred while fetching the weather data. Please contact @stewpidest")
@@ -148,6 +182,100 @@ async def get_weather_by_location(ctx):
         await ctx.send("Your city information is not saved. Please use !get_location to save it.")
         return
     await get_weather(ctx, city=city)
+
+
+# Command to enable/disable weather tips
+@bot.command(name='weatherTips')
+async def toggle_weather_tips(ctx, status: str):
+    if status.lower() == "on":
+        user_weather_tips[ctx.author.id] = True
+        await ctx.send("Weather tips enabled.")
+    elif status.lower() == "off":
+        user_weather_tips[ctx.author.id] = False
+        await ctx.send("Weather tips disabled.")
+    else:
+        await ctx.send("Invalid input. Use `!weatherTips [on/off]`.")
+
+# Command to enable/disable severe weather alerts
+@bot.command(name='weatherAlerts')
+async def toggle_weather_alerts(ctx, status: str):
+     #Search if id is saved in user_cities list
+    city = user_cities.get(ctx.author.id)
+    if city:
+        if status.lower() == "on":
+            user_weather_alerts[ctx.author.id] = True
+            await ctx.send("Severe weather alerts enabled for "+str(ctx.author.name)+" about "+ str(user_cities.get(ctx.author.id))+" weather.")
+        elif status.lower() == "off":
+            user_weather_alerts[ctx.author.id] = False
+            await ctx.send("Severe weather alerts disabled.")
+        else:
+            await ctx.send("Invalid input. Use `!weatherAlerts [on/off]`.")
+    else: await ctx.send("Your city information is not saved. Please use !get_location to save it.")
+
+# Command to set up regular weather updates (float)
+@bot.command(name='setWeatherUpdates')
+async def set_weather_updates(ctx, city: str, interval: float):
+    user_id = ctx.author.id
+    if user_id in weather_update_tasks:
+        weather_update_tasks[user_id].cancel()
+
+    async def send_weather_updates():
+        while True:
+            try:
+                url = f"http://api.weatherapi.com/v1/current.json?key={API_KEY}&q={city}"
+                response = requests.get(url)
+                data = response.json()
+
+                if "error" in data:
+                    await ctx.send(f"City {city} not found.")
+                    return
+
+                location = data["location"]
+                current = data["current"]
+
+                weather_report = (
+                    f"**The Weather in {location['name']}, {location['country']}:**\n"
+                    f"The Condition is {current['condition']['text']}"
+                    f" with a Temperature of ***{current['temp_f']}°F***"
+                    f" but really Feels Like ***{current['feelslike_f']}°F***.\n"
+                    f"In the other hand, Humidity is in ***{current['humidity']}%***"
+                    f" and the Wind Speed is ***{current['wind_mph']} mph***.\n\n"
+                    f"**Weather Update for {city}**\n\n"
+                )
+
+                await ctx.send(weather_report)
+                
+                # Send weather tips if enabled
+                if user_weather_tips.get(ctx.author.id, False):
+                    condition = current['condition']['text']
+                    tip = weather_tips.get(condition, "No tips available for this weather condition.")
+                    await ctx.send(f"**Weather Tip:** {tip}")
+                else:
+                    await ctx.send(f"**(Activate Weather Tips with !weatherTips on)**")
+                    
+
+                await nextcord.utils.sleep_until(nextcord.utils.utcnow() + timedelta(minutes=interval))
+                
+            except Exception as e:
+                print(e)
+                await nextcord.utils.sleep_until(nextcord.utils.utcnow() + timedelta(minutes=interval))
+
+    task = bot.loop.create_task(send_weather_updates())
+    weather_update_tasks[user_id] = task
+    await ctx.send(f"Weather updates for {city} set at an interval of {interval} minutes.")
+
+
+# Command to stop weather updates
+@bot.command(name='stopWeatherUpdates')
+async def stop_weather_updates(ctx):
+    user_id = ctx.author.id
+    if user_id in weather_update_tasks:
+        weather_update_tasks[user_id].cancel()
+        del weather_update_tasks[user_id]
+        await ctx.send("Weather updates stopped.")
+    else:
+        await ctx.send("No weather updates are currently set.")
+
 
 # COMMAND to get weather information for all active members of the server
 @bot.command(name='weather_all')
@@ -236,11 +364,15 @@ async def get_weather_spanish(ctx, *, city: str):
 @bot.command(name='commands')
 async def show_commands(ctx):
     commands_list = [
-        "`!weather <city>` - Get the current weather for a specified city.",
+        "`!weather <city>` - Get the current weather for a specified city (Including AI Image of the weather).",
         "`!weather_me` - Get the weather based on your location (If it is saved).",
         "`!weather_all` - Get the weather for all active members of the server (If it is saved).",
         "`!weather_spanish <city>` - Get the weather in Spanish for a specified city.",
         "`!get_location` - Save your current location.",
+        "`!weatherTips [on/off]` - Enable or disable weather tips.",
+        "`!weatherAlerts [on/off]` - Enable or disable severe weather alerts.",
+        "`!setWeatherUpdates <city> <interval>` - Set up regular weather updates.",
+        "`!stopWeatherUpdates` - Stop regular weather updates.",
         "`!about` - Show Bot information.",
         # Add more commands here as needed
     ]
@@ -261,6 +393,30 @@ async def about_command(ctx):
     embed.add_field(name="Commands", value="Use `!commands` to see the list of available commands.", inline=True)
 
     await ctx.send(embed = embed)
+
+
+# Task to monitor severe weather conditions
+@tasks.loop(minutes=15)
+async def check_severe_weather():
+    for user_id, city in user_cities.items():
+        if user_weather_alerts.get(user_id, False):
+            try:
+                url = f"http://api.weatherapi.com/v1/current.json?key={API_KEY}&q={city}"
+                response = requests.get(url)
+                data = response.json()
+
+                if "error" in data:
+                    continue
+
+                current = data["current"]
+                if current["condition"]["text"] in ["Thunderstorm", "Heavy Rain", "Blizzard"]:
+                    user = await bot.fetch_user(user_id)
+                    await user.send(f"Severe weather alert for {city}: {current['condition']['text']}")
+
+            except Exception as e:
+                print(e)
+
+check_severe_weather.start()
 
 # 6th Step: Let's run the bot--------------------------------------------------------------------------------------------
 try:
