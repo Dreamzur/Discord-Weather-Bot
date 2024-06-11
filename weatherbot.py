@@ -12,12 +12,9 @@ import io
 load_dotenv(".env")
 
 #----APIs to use----#
-# WeatherAPI key
-API_KEY = os.getenv('KEY')
-# API_BOT_Discord
-API_BOT = os.getenv('TOKEN')
-# DEEP_AI_API to generate AI Images
-DEEP_AI_API_KEY = os.getenv('DEEP_AI_API_KEY')
+API_KEY = os.getenv('KEY') # WeatherAPI key
+API_BOT = os.getenv('TOKEN') # API_BOT_Discord
+DEEP_AI_API_KEY = os.getenv('DEEP_AI_API_KEY') # DEEP_AI_API to generate AI Images
 #-------------------#
 
 
@@ -118,9 +115,6 @@ async def generate_weather_image(condition: str):
     else:
         raise Exception(f"Error generating image with DeepAI API: {result.get('error', 'Unknown error')}")
 
-
-
-
 # 4th Step: Command to get weather information------------------------------------------------------------------
 @bot.command(name='weather')
 async def get_weather(ctx, *, city: str): #Get info of the weather of the given city
@@ -171,7 +165,6 @@ async def get_weather(ctx, *, city: str): #Get info of the weather of the given 
         await ctx.send("An error occurred while fetching the weather data. Please contact @stewpidest")
         print(e)
 
-
 # ------------5th Step: Add default commands------------------#-----------------------------------------------------
 # COMMAND to get weather information based on user's location previously saved using id
 @bot.command(name='weather_me')
@@ -182,7 +175,6 @@ async def get_weather_by_location(ctx):
         await ctx.send("Your city information is not saved. Please use !get_location to save it.")
         return
     await get_weather(ctx, city=city)
-
 
 # Command to enable/disable weather tips
 @bot.command(name='weatherTips')
@@ -264,7 +256,6 @@ async def set_weather_updates(ctx, city: str, interval: float):
     weather_update_tasks[user_id] = task
     await ctx.send(f"Weather updates for {city} set at an interval of {interval} minutes.")
 
-
 # Command to stop weather updates
 @bot.command(name='stopWeatherUpdates')
 async def stop_weather_updates(ctx):
@@ -275,7 +266,6 @@ async def stop_weather_updates(ctx):
         await ctx.send("Weather updates stopped.")
     else:
         await ctx.send("No weather updates are currently set.")
-
 
 # COMMAND to get weather information for all active members of the server
 @bot.command(name='weather_all')
@@ -359,7 +349,6 @@ async def get_weather_spanish(ctx, *, city: str):
         await ctx.send("Se produjo un error al obtener los datos meteorológicos. Por favor, contacta a @stewpidest")
         print(e)
 
-
 #Help COMMAND: This command shows the list of all default commands
 @bot.command(name='commands')
 async def show_commands(ctx):
@@ -393,7 +382,6 @@ async def about_command(ctx):
     embed.add_field(name="Commands", value="Use `!commands` to see the list of available commands.", inline=True)
 
     await ctx.send(embed = embed)
-
 
 # Task to monitor severe weather conditions
 @tasks.loop(minutes=15)
