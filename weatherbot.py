@@ -376,6 +376,7 @@ async def show_commands(ctx):
         "`!setWeatherUpdates <city> <interval>` - Set up regular weather updates for a specific city at a chosen interval.",
         "`!stopWeatherUpdates` - Stop receiving regular weather updates.",
         "`!about` - Learn more about this bot and its capabilities.",
+        "`!shutdown` - Disconnects the bot and shuts it down.",
         # Add more commands here as needed
     ]
     commands_text = "**Here are the commands you can use:**\n\n"
