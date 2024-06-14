@@ -43,11 +43,15 @@ async def on_ready():
 
 # List of greeting phrases (Can be added as many as needed)
 greeting_English = [
-    "**Hey, I'm glad you asked, {user}!**",
-    "**Sure thing, {user}!**",
-    "**Happy to help, {user}!**",
-    "**Absolutely, {user}!**",
-    "**Of course, {user}!**"
+    "**Hey {user}! Ready to dive into the weather?**",
+    "**Well, hello there {user}! Let's get this weather party started!**",
+    "**Hey hey, {user}! Weather adventures await!**",
+    "**Greetings, {user}! Let's weather the day together!**",
+    "**Hey {user}! The weather's fine, and so are you! Let's do this!**",
+    "**Hiya, {user}! Let's sprinkle some weather magic!**",
+    "**Hey {user}! Time to weather up and dive in!**",
+    "**Hey {user}! Let's weather this storm together!**",
+    "**Well, hello {user}! Weather or not, here we come!**",
 ]
 greeting_Spanish = [
     "**Hola {user}, que bueno que preguntas!**",
@@ -316,7 +320,6 @@ async def get_weather_for_all(ctx):
         await ctx.send("An error occurred while fetching weather information for all members.")
         print(e)
 
-
 # COMMAND to get weather information in Spanish
 @bot.command(name='weather_spanish')
 async def get_weather_spanish(ctx, *, city: str):
@@ -353,16 +356,16 @@ async def get_weather_spanish(ctx, *, city: str):
 @bot.command(name='commands')
 async def show_commands(ctx):
     commands_list = [
-        "`!weather <city>` - Get the current weather for a specified city (Including AI Image of the weather).",
-        "`!weather_me` - Get the weather based on your location (If it is saved).",
-        "`!weather_all` - Get the weather for all active members of the server (If it is saved).",
-        "`!weather_spanish <city>` - Get the weather in Spanish for a specified city.",
-        "`!get_location` - Save your current location.",
-        "`!weatherTips [on/off]` - Enable or disable weather tips.",
-        "`!weatherAlerts [on/off]` - Enable or disable severe weather alerts.",
-        "`!setWeatherUpdates <city> <interval>` - Set up regular weather updates.",
-        "`!stopWeatherUpdates` - Stop regular weather updates.",
-        "`!about` - Show Bot information.",
+        "`!weather <city>` - Get the current weather for a specified city, complete with an AI-generated weather image.",
+        "`!weather_me` - Receive personalized weather updates based on your saved location.",
+        "`!weather_all` - Check the weather for all active members of the server, if their location is saved.",
+        "`!weather_spanish <city>` - ¡Obtén el clima en español para una ciudad específica!",
+        "`!get_location` - Save your current location for personalized weather updates",
+        "`!weatherTips [on/off]` - Toggle helpful weather tips on or off.",
+        "`!weatherAlerts [on/off]` - Activate or deactivate severe weather alerts.",
+        "`!setWeatherUpdates <city> <interval>` - Set up regular weather updates for a specific city at a chosen interval.",
+        "`!stopWeatherUpdates` - Stop receiving regular weather updates.",
+        "`!about` - Learn more about this bot and its capabilities.",
         # Add more commands here as needed
     ]
     commands_text = "**Here are the commands you can use:**\n\n"
@@ -374,7 +377,7 @@ async def show_commands(ctx):
 async def about_command(ctx):
     embed = nextcord.Embed(
         title= "About Me",
-        description= "Hello! I'm your servers Weather Bot. Currently I'm under development so don't have many useful features as of yet."
+        description= "Hello! I'm here to provide you with the latest weather updates and tips, right in your Discord server!"
     )
     embed.add_field(name="Author", value="Capstone I Group I", inline=True)
     embed.add_field(name="Version", value="0", inline=True)
