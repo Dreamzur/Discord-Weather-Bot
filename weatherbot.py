@@ -7,6 +7,7 @@ from dotenv import load_dotenv #This library is used for the dotenv file
 from PIL import Image
 from datetime import timedelta
 import io
+import asyncio
 
 # Load environment variables
 load_dotenv(".env")
@@ -69,6 +70,15 @@ weather_tips = {
     'Thunderstorm': "Stay indoors and avoid using electrical appliances!",
     'Partly cloudy': "Don't forget your umbrella! It may rain."
 }
+# Shut down messages for the bot (Can add more if needed...)
+shutdown_Message = [
+    "Ciao for now! I'm off to count zeros and ones.",
+    "System shutting down. I'll dream of algorithms!",
+    "Shutting down... Don't worry, I'll be back before you can say 'artificial intelligence'!",
+    "Time to hit the hay... or whatever it is bots hit.",
+    "Powering down... Time to practice my shutdown dance moves!",
+    "Signing off... I'm going where no bot has gone before: offline!",
+]
 
 # 3rd Step: Get user's location from saved list or add it if needed----------------------------------------------
 @bot.command(name='get_location')
@@ -386,6 +396,16 @@ async def about_command(ctx):
 
     await ctx.send(embed = embed)
 
+@bot.command(name='shutdown')
+@commands.has_permissions(administrator=True)
+async def shutdown(ctx):
+    shutdownMessage = random.choice(shutdown_Message)
+    await ctx.send(f"{shutdownMessage}")
+    # Give some time for the message to be sent before shutting down
+    await asyncio.sleep(2)
+    await ctx.bot.close()
+
+    
 # Task to monitor severe weather conditions
 @tasks.loop(minutes=15)
 async def check_severe_weather():
