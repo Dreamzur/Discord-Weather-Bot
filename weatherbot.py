@@ -460,18 +460,18 @@ async def get_weather_for_all(ctx):
                             temp_text = f"{current['temp_c']}°C"
                             feels_text = f"{current['feelslike_c']}°C"
 
-                            weather_report = (
-                                f"**The Weather in {location['name']}, {location['country']}:**\n"
-                                f"The Condition is {current['condition']['text']}"
-                                f" with a Temperature of "
-                                f"***{temp_text}***"
-                                f" but really Feels Like "
-                                f"***{feels_text}***"
-                                f"\nIn the other hand, Humidity is in ***{current['humidity']}%***"
-                                f" and the Wind Speed is ***{current['wind_mph']} mph***.\n\n"
-                            )
+                        weather_report = (
+                            f"**The Weather in {location['name']}, {location['country']}:**\n"
+                            f"The Condition is {current['condition']['text']}"
+                            f" with a Temperature of "
+                            f"***{temp_text}***"
+                            f" but really Feels Like "
+                            f"***{feels_text}***"
+                            f"\nIn the other hand, Humidity is in ***{current['humidity']}%***"
+                            f" and the Wind Speed is ***{current['wind_mph']} mph***.\n\n"
+                        )
 
-                            weather_info.append(f"{member.display_name}: {weather_report}")
+                        weather_info.append(f"{member.display_name}: {weather_report}")
                     except Exception as e:
                         weather_info.append(f"{member.display_name}: An error occurred while fetching weather data.")
                         print(e)
