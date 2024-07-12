@@ -242,14 +242,26 @@ async def get_weather(ctx, *, city: str): #Get info of the weather of the given 
 
         #Here it can be added as many as parameters necessary to show in the weather request
         user_id = ctx.author.id
+        weather_report = ()
+
+        temp_text = ""
+        feels_text = ""
+        # Check if user_preferences exists and if the user_id is in it
+        if user_id not in user_preferences or user_preferences[user_id] == 'F':
+            temp_text = f"{current['temp_f']}°F"
+            feels_text = f"{current['feelslike_f']}°F"
+        else:
+            temp_text = f"{current['temp_c']}°C"
+            feels_text = f"{current['feelslike_c']}°C"
+
         weather_report = (
             f"**The Weather in {location['name']}, {location['country']}:**\n"
             f"The Condition is {current['condition']['text']}"
             f" with a Temperature of "
-            f"***{current['temp_f']}°F***" if ((user_id in user_preferences and user_preferences[user_id] == 'F') or not user_preferences) else f"***{current['temp_c']}°C***"
+            f"***{temp_text}***"
             f" but really Feels Like "
-            f"***{current['feelslike_f']}°F***" if ((user_id in user_preferences and user_preferences[user_id] == 'F') or not user_preferences) else f"***{current['feelslike_c']}°C***.\n"
-            f"In the other hand, Humidity is in ***{current['humidity']}%***"
+            f"***{feels_text}***" 
+            f"\nIn the other hand, Humidity is in ***{current['humidity']}%***"
             f" and the Wind Speed is ***{current['wind_mph']} mph***.\n\n"
             f"**Ask me for any City!**\n\n"
             f"**Weather Cat Illustration:**"
@@ -343,15 +355,26 @@ async def set_weather_updates(ctx, city: str, interval: float):
                 location = data["location"]
                 current = data["current"]
 
+                weather_report = ()
+
+                temp_text = ""
+                feels_text = ""
+                # Check if user_preferences exists and if the user_id is in it
+                if user_id not in user_preferences or user_preferences[user_id] == 'F':
+                    temp_text = f"{current['temp_f']}°F"
+                    feels_text = f"{current['feelslike_f']}°F"
+                else:
+                    temp_text = f"{current['temp_c']}°C"
+                    feels_text = f"{current['feelslike_c']}°C"
+
                 weather_report = (
                     f"**The Weather in {location['name']}, {location['country']}:**\n"
                     f"The Condition is {current['condition']['text']}"
-                    # Convert temperature based on user preference
                     f" with a Temperature of "
-                    f"***{current['temp_f']}°F***" if (user_id in user_preferences and user_preferences[user_id] == 'F') or not user_preferences else f"***{current['temp_c']}°C***"
+                    f"***{temp_text}***"
                     f" but really Feels Like "
-                    f"***{current['feelslike_f']}°F***" if (user_id in user_preferences and user_preferences[user_id] == 'F') or not user_preferences else f"***{current['feelslike_c']}°C***.\n"
-                    f"In the other hand, Humidity is in ***{current['humidity']}%***"
+                    f"***{feels_text}***"
+                    f"\nIn the other hand, Humidity is in ***{current['humidity']}%***"
                     f" and the Wind Speed is ***{current['wind_mph']} mph***.\n\n"
                     f"**Weather Update for {city}**\n\n"
                 )
@@ -417,15 +440,25 @@ async def get_weather_for_all(ctx):
                             current = weather_data["current"]
 
                             user_id = ctx.author.id  # Assuming ctx is defined elsewhere
+
+                        temp_text = ""
+                        feels_text = ""
+                        # Check if user_preferences exists and if the user_id is in it
+                        if user_id not in user_preferences or user_preferences[user_id] == 'F':
+                            temp_text = f"{current['temp_f']}°F"
+                            feels_text = f"{current['feelslike_f']}°F"
+                        else:
+                            temp_text = f"{current['temp_c']}°C"
+                            feels_text = f"{current['feelslike_c']}°C"
+
                             weather_report = (
                                 f"**The Weather in {location['name']}, {location['country']}:**\n"
                                 f"The Condition is {current['condition']['text']}"
-                                # Convert temperature based on user preference
                                 f" with a Temperature of "
-                                f"***{current['temp_f']}°F***" if (user_id in user_preferences and user_preferences[user_id] == 'F') or not user_preferences else f"***{current['temp_c']}°C***"
+                                f"***{temp_text}***"
                                 f" but really Feels Like "
-                                f"***{current['feelslike_f']}°F***" if (user_id in user_preferences and user_preferences[user_id] == 'F') or not user_preferences else f"***{current['feelslike_c']}°C***.\n"
-                                f"In the other hand, Humidity is in ***{current['humidity']}%***"
+                                f"***{feels_text}***"
+                                f"\nIn the other hand, Humidity is in ***{current['humidity']}%***"
                                 f" and the Wind Speed is ***{current['wind_mph']} mph***.\n\n"
                             )
 
@@ -459,15 +492,26 @@ async def get_weather_spanish(ctx, *, city: str):
         current = data["current"]
 
         user_id = ctx.author.id 
+
+        temp_text = ""
+        feels_text = ""
+        # Check if user_preferences exists and if the user_id is in it
+        if user_id not in user_preferences or user_preferences[user_id] == 'F':
+            temp_text = f"{current['temp_f']}°F"
+            feels_text = f"{current['feelslike_f']}°F"
+        else:
+            temp_text = f"{current['temp_c']}°C"
+            feels_text = f"{current['feelslike_c']}°C"
+
         weather_report = (
             f"**El clima en {location['name']}, {location['country']}:**\n"
             f"La condición es {current['condition']['text']}"
             # Convert temperature based on user preference
             f" con una temperatura de "
-            "***{current['temp_f']}°F***" if (user_id in user_preferences and user_preferences[user_id] == 'F') or not user_preferences else f"***{current['temp_c']}°C***"
+            f"***{temp_text}***"
             f" pero se siente como "
-            f"***{current['feelslike_f']}°F***" if (user_id in user_preferences and user_preferences[user_id] == 'F') or not user_preferences else f"***{current['feelslike_c']}°C***.\n"
-            f"Por otro lado, la humedad es del ***{current['humidity']}%***"
+            f"***{feels_text}***"
+            f"\nPor otro lado, la humedad es del ***{current['humidity']}%***"
             f" y la velocidad del viento es de ***{current['wind_mph']} mph***.\n\n"
             f"**¡Pregúntame por cualquier ciudad!**"
         )
@@ -649,6 +693,7 @@ async def get_weekly_weather(ctx, *, city: str):
 
              # Convert temperature based on user preference
             user_id = ctx.author.id
+
             if user_id in user_preferences and user_preferences[user_id] == 'F' or not user_preferences:
                 max_temp = day['day']['maxtemp_f']
                 min_temp = day['day']['mintemp_f']
