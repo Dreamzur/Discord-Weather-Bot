@@ -211,18 +211,27 @@ async def generate_weather_image(condition: str):
 
     print(f"Prompt sent to DeepAI: {data['text']}")  # Log the prompt for debugging
 
-    response = requests.post(url, headers=headers, data=data)
-    result = response.json()
-    
-    # Print the result for debugging
-    print(f"DeepAI response: {result}")
+    try:
+        response = requests.post(url, headers=headers, data=data)
+        response.raise_for_status()
+        result = response.json()
 
-    if 'output_url' in result:
-        image_response = requests.get(result['output_url'])
-        image = Image.open(io.BytesIO(image_response.content))
-        return image
-    else:
-        raise Exception(f"Error generating image with DeepAI API: {result.get('error', 'Unknown error')}")
+        # Print the result for debugging
+        print(f"DeepAI response: {result}")
+
+        if 'output_url' in result:
+            image_response = requests.get(result['output_url'])
+            image_response.raise_for_status()
+            image = Image.open(io.BytesIO(image_response.content))
+            return image
+        else:
+            raise Exception(f"Error generating image with DeepAI API: {result.get('error', 'Unknown error')}")
+    except requests.RequestException as e:
+        print(f"Request failed: {e}")
+        raise
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        raise
 
 # 4th Step: Command to get weather information------------------------------------------------------------------
 @bot.command(name='weather')
