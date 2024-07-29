@@ -53,6 +53,45 @@ Learn more about this bot and its capabilities. This command provides an overvie
 ### `!shutdown`
 Disconnects the bot and shuts it down. Use this command to safely turn off the bot when it's no longer needed.
 
+### `!air_quality` 
+Shows the air quality in your saved location.
+
+### `!start_weather_news` 
+Fetch weather news to show in the chat.
+
+### `!stop_weather_news`
+Stops showing new weather news.
+
+### `!sun_times <city>`
+Get the sunset and sunrise times for a location.
+
+### `!weekly_weather <city>` 
+Get the weekly forecast weather for a location for the next 3 days.
+
+### `!weather_joke`
+Get some random joke related to the weather.
+
+### `!get_quote`
+Get some motivational quote to start the day.
+
+### `!weather_quiz` 
+Participate in a weather quiz!.
+
+### `!currenttemp <city>`
+Get the current temperature of a given city.
+
+### `!toggletemp`
+Change the default temperature format (F/C).
+
+### `!leaderboard`
+Show the leaderboard for the server based on user activity.
+
+### `!join`
+Join the bot to the voice channel and play music.
+
+### `!leave`
+Make the bot leave the voice channel.
+
 ## Usage Examples
 
 - To get the current weather for London:
